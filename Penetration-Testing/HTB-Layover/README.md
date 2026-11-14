@@ -78,7 +78,7 @@ Local service permissions and administrative interfaces warrant careful assessme
 
 ## Key Takeaways
 
-This project demonstrates the importance of understanding **how security weaknesses interact**, rather than evaluating each vulnerability in isolation.
+This assessment demonstrates how weaknesses across wireless networks, authentication systems, web applications, and internal infrastructure can be chained together to enable progressively deeper system compromise.
 
 The assessment strengthened practical experience in attack-surface mapping, traffic analysis, web exploitation, internal access assessment, technical troubleshooting and evidence-driven reporting.
 
