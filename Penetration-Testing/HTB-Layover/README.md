@@ -1,39 +1,89 @@
-Layover | Multi-Stage Infrastructure Penetration Test
+# Layover
+### Multi-Stage Infrastructure Penetration Test
 
-Hack The Box Labs | Network Security, Web Exploitation & Internal Infrastructure Assessment
+**Hack The Box Labs** · `Network Security` · `Web Exploitation` · `Linux Security`
 
-Project Overview
+---
 
-Layover explores a multi-stage attack against an interconnected infrastructure environment, demonstrating how security weaknesses across different technologies can combine into a broader compromise.
+## Overview
 
-The assessment moves beyond conventional service enumeration, incorporating wireless network investigation, packet-level traffic analysis, authentication weaknesses, web application exploitation, and internal Linux system access.
+Layover is a multi-stage penetration-testing assessment examining how vulnerabilities across interconnected infrastructure can be chained to compromise internal systems.
 
-A central aspect of the project is the progression between distinct attack surfaces: information obtained through network analysis informs application-level testing, while successful exploitation creates opportunities to investigate deeper infrastructure components.
+The project spans **wireless networking, packet analysis, credential security, web application exploitation, and Linux post-exploitation**, providing an end-to-end perspective on how individual weaknesses contribute to broader organisational risk.
 
-Technical Highlights
+Rather than treating vulnerabilities in isolation, the assessment focuses on **attack-path development**, tracing how each discovery creates opportunities for further investigation and access.
 
-Infrastructure reconnaissance: Mapped exposed services, identified remote-access entry points, and explored the internal network environment.
+## Assessment Workflow
 
-Wireless security assessment: Analysed wireless communications and captured network traffic to investigate authentication and credential exposure.
+```text
+Reconnaissance
+      |
+      v
+Network & Wireless Investigation
+      |
+      v
+Traffic Analysis & Credential Exposure
+      |
+      v
+Web Application Security Assessment
+      |
+      v
+Remote Code Execution
+      |
+      v
+Internal Infrastructure Access
+      |
+      v
+Linux Privilege-Escalation Assessment
+```
 
-Web application exploitation: Investigated an authenticated Craft CMS attack surface and demonstrated server-side remote code execution.
+## Technical Coverage
 
-Post-exploitation: Established an interactive reverse shell, inspected application configuration, and analysed exposed secrets.
+| Domain | Tools & Techniques |
+|:---|:---|
+| **Network Security** | Nmap, service enumeration, network mapping |
+| **Wireless Analysis** | Wi-Fi enumeration, monitor mode, tcpdump |
+| **Traffic Investigation** | Packet capture, protocol analysis, credential exposure |
+| **Web Application Security** | Craft CMS, authenticated application testing |
+| **Exploitation** | Server-side remote code execution, reverse shells |
+| **Internal Access** | SSH, Linux configuration and secret analysis |
+| **Privilege Escalation** | CUPS service enumeration, vulnerability research |
 
-Internal infrastructure access: Established authenticated SSH access to an internal Linux server and investigated its security posture.
+## Security Findings & Implications
 
-Privilege-escalation research: Examined CUPS service configuration and researched the implications of privileged service vulnerabilities.
+**01 / Sensitive Information Exposure**
 
-Security Significance
+Unprotected communications can expose authentication material, creating opportunities for attackers to progress beyond their initial access.
 
-The exercise illustrates how seemingly separate security weaknesses can interact across network, application, and operating-system boundaries.
+**02 / Web Application Attack Surface**
 
-It highlights the importance of defence in depth, secure credential handling, application hardening, network segmentation, and restricting privileged service capabilities.
+Authenticated application functionality may introduce exploitable server-side behaviour, making secure configuration and vulnerability management essential.
 
-Professional Takeaways
+**03 / Internal Trust Boundaries**
 
-The project strengthened practical skills in multi-stage attack-path analysis, vulnerability validation, network traffic investigation, Linux security, and technical evidence collection.
+Compromised credentials and application secrets can facilitate access to internal infrastructure, illustrating the risks of insufficiently enforced trust boundaries.
 
-It also reinforced the importance of connecting individual technical findings to broader infrastructure risks and communicating those risks through structured security reporting.
+**04 / Privileged Service Security**
 
-Conducted within an authorised Hack The Box laboratory environment.
+Local service permissions and administrative interfaces warrant careful assessment because weaknesses in these components can expose opportunities for privilege escalation.
+
+## Defensive Priorities
+
+- **Encrypted communications:** Protect authentication traffic and sensitive information in transit.
+- **Credential management:** Restrict access to secrets and strengthen account protections.
+- **Application hardening:** Maintain security updates and review authenticated functionality.
+- **Network segmentation:** Limit unnecessary communication between infrastructure components.
+- **Least privilege:** Restrict administrative capabilities and secure privileged services.
+- **Monitoring:** Detect suspicious authentication, unusual outbound connections and unexpected process execution.
+
+## Key Takeaways
+
+This project demonstrates the importance of understanding **how security weaknesses interact**, rather than evaluating each vulnerability in isolation.
+
+The assessment strengthened practical experience in attack-surface mapping, traffic analysis, web exploitation, internal access assessment, technical troubleshooting and evidence-driven reporting.
+
+It also reinforced the value of translating exploitation findings into **actionable defensive recommendations**.
+
+---
+
+<sub>**Environment:** Authorised Hack The Box laboratory · **Documentation:** Public, non-spoiler assessment summary</sub>
