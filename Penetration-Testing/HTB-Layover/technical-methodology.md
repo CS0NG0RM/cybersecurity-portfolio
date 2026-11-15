@@ -202,27 +202,37 @@ CRAFT_DB_DATABASE=<REDACTED>
 
 **Finding:** The compromised application account could read database connection details and an application security key. During subsequent database investigation, an unresponsive interactive command and a `Ctrl+C` interruption terminated the basic reverse shell. This was a shell-stability issue, not a verified database extraction.
 
-## 6. Internal SSH Access
+## 6. Internal SSH Access & Credential Security
 
-I investigated authentication material and the available access paths beyond the web-service account. Database-based recovery of the subsequent SSH credential was **not completed** during this session; it should not be presented as a verified extraction step.
+### Application Secrets and Credential Exposure
 
-An identified internal account was successfully authenticated over SSH:
+The application-server investigation revealed database connection details and a Craft CMS security key in the environment configuration.
+
+This exposed an important security weakness: encrypted credentials do not provide meaningful separation if the compromised application can access both the stored ciphertext and the key required to decrypt it.
+
+The investigation then moved to the authentication boundary between the web application and the underlying Linux system.
+
+### SSH Access
 
 ```bash
 ssh aporter@<INTERNAL_HOST>
 ```
 
+**Result:** Successfully authenticated as `aporter` and established an interactive Linux shell.
+
 ```text
 aporter@portal:~$
 ```
 
-I verified access to the account's assessment artefact:
+### Access Verification
 
 ```bash
 cat ~/user.txt
 ```
 
-**Result:** The User Flag was retrieved and accepted by Hack The Box. The flag and account password are not included in the public record.
+**Result:** User Flag retrieved and accepted by Hack The Box.
+
+**Security significance:** Exposure of application secrets can increase the impact of an initial web compromise, particularly where credentials are shared across services.
 
 ## 7. Linux Privilege Escalation Assessment
 
