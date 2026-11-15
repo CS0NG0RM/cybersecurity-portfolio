@@ -10,6 +10,9 @@
 **Assessment Score:** 1,020 / 1,100 (92.7%)  
 **TryHackMe Challenge:** [Quiet as the Grave](https://tryhackme.com/threat-hunting-sim/public-summary/a2124533514501ec82cb06dfdc9bf2502aa576af7877bb0b3a9e2667df2b77ad668456481f36eceaae37cc0a800aafa5))
 
+<img width="1082" height="516" alt="image" src="https://github.com/user-attachments/assets/74a79a02-5cef-43d6-8809-5b045904de04" />
+
+
 ## 1. Executive Summary
 
 This case study documents a threat hunting investigation into a multi-stage intrusion targeting TryHatMe Studios and its unreleased NeuralNexus project.
