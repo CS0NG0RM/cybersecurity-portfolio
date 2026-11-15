@@ -200,7 +200,7 @@ CRAFT_DB_PASSWORD=<REDACTED>
 CRAFT_DB_DATABASE=<REDACTED>
 ```
 
-**Finding:** The compromised application account could read database connection details and an application security key. During subsequent database investigation, an unresponsive interactive command and a `Ctrl+C` interruption terminated the basic reverse shell.
+**Finding:** The compromised application account could access sensitive configuration material, including database credentials and the Craft CMS security key.
 
 ## 6. Internal SSH Access & Credential Security
 
