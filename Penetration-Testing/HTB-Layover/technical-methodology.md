@@ -200,17 +200,15 @@ CRAFT_DB_PASSWORD=<REDACTED>
 CRAFT_DB_DATABASE=<REDACTED>
 ```
 
-**Finding:** The compromised application account could read database connection details and an application security key. During subsequent database investigation, an unresponsive interactive command and a `Ctrl+C` interruption terminated the basic reverse shell. This was a shell-stability issue, not a verified database extraction.
+**Finding:** The compromised application account could read database connection details and an application security key. During subsequent database investigation, an unresponsive interactive command and a `Ctrl+C` interruption terminated the basic reverse shell.
 
 ## 6. Internal SSH Access & Credential Security
 
 ### Application Secrets and Credential Exposure
 
-The application-server investigation revealed database connection details and a Craft CMS security key in the environment configuration.
+The application configuration exposed database connection details and a Craft CMS security key. I examined the implications for credential protection and access between application services and Linux accounts.
 
-This exposed an important security weakness: encrypted credentials do not provide meaningful separation if the compromised application can access both the stored ciphertext and the key required to decrypt it.
-
-The investigation then moved to the authentication boundary between the web application and the underlying Linux system.
+The next stage involved validating SSH authentication to the internal Linux server.
 
 ### SSH Access
 
