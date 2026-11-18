@@ -1,4 +1,4 @@
-# Azure Cloud Security Lab: CryptoCabana
+<img width="704" height="331" alt="image" src="https://github.com/user-attachments/assets/e56e5e03-fafd-467f-adb2-3d229cfd5cf2" /># Azure Cloud Security Lab: CryptoCabana
 
 Hands-on Microsoft Azure cloud security lab completed through TryHackMe.
 
@@ -99,6 +99,7 @@ A JavaScript resource used by the application could be downloaded for inspection
 ```bash
 curl https://<LAB-APPLICATION>/app.js -o app.js
 ```
+<img width="704" height="331" alt="image" src="https://github.com/user-attachments/assets/6b97ce45-394c-4ab7-bab7-f89c058aef16" />
 
 The purpose was to determine what configuration or cloud-access information was exposed client-side and whether it pointed toward additional Azure resources.
 
