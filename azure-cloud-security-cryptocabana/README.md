@@ -1,4 +1,4 @@
-<img width="704" height="331" alt="image" src="https://github.com/user-attachments/assets/e56e5e03-fafd-467f-adb2-3d229cfd5cf2" /># Azure Cloud Security Lab: CryptoCabana
+# Azure Cloud Security Lab: CryptoCabana
 
 Hands-on Microsoft Azure cloud security lab completed through TryHackMe.
 
