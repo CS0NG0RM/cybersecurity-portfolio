@@ -2,6 +2,8 @@
 
 > Hands-on Azure cloud security lab completed in the TryHackMe CryptoCabana environment.
 
+https://tryhackme.com/room/hh-cryptocabana-f81cac95?utm_campaign=social_share&utm_medium=social&utm_content=share-completed-room&utm_source=copy&share_date=2026-11-18&sharerId=6aeb8235127e36e4ec8f6c56
+
 ## Overview
 
 This repository documents my approach to the **TryHackMe CryptoCabana** cloud security challenge.
