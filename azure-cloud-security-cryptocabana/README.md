@@ -1,8 +1,10 @@
 # Azure Cloud Security Lab: CryptoCabana
 
-> Hands-on Azure cloud security lab completed in the TryHackMe CryptoCabana environment.
+Hands-on Microsoft Azure cloud security lab completed through TryHackMe.
 
-https://tryhackme.com/room/hh-cryptocabana-f81cac95?utm_campaign=social_share&utm_medium=social&utm_content=share-completed-room&utm_source=copy&share_date=2026-11-18&sharerId=6aeb8235127e36e4ec8f6c56
+[ [TryHackMe | CryptoCabana](https://tryhackme.com/room/hh-cryptocabana-f81cac95?utm_campaign=social_share&utm_medium=social&utm_content=share-completed-room&utm_source=copy&share_date=2026-11-18&sharerId=6aeb8235127e36e4ec8f6c56) ]
+
+Completed · Microsoft Azure · Cloud Security · Medium
 
 ## Overview
 
