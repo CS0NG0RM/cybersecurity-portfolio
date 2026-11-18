@@ -267,7 +267,7 @@ az keyvault secret show \
 
 ### Evidence
 
-<img width="900" alt="Azure Key Vault historical secret investigation" src="PASTE-SECOND-IMAGE-URL-HERE">
+<img width="484" height="346" alt="image" src="https://github.com/user-attachments/assets/aa949b2f-69ac-4618-82f6-d335f30cce00" />
 
 *Figure 2. Azure Cloud Shell session showing the investigation of a historical Key Vault secret version. Lab-specific identifiers, usernames, version IDs, and secret values have been redacted.*
 
